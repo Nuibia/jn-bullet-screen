@@ -1,10 +1,21 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { defaultOptions, getContainer, initBulletAnimate, IOptionsProps } from './helper';
+import {
+  defaultOptions,
+  getContainer,
+  initBulletAnimate,
+  IOptionsProps,
+} from './helper';
+
+interface IQueues {
+  item: any;
+  container: HTMLDivElement;
+  customTop: number | undefined;
+}
 
 export default class BulletScreen {
   /** 弹幕容器 */
-  target: HTMLElement | null = null;
+  target: HTMLElement | null;
   /** 弹幕配置 */
   options = defaultOptions;
   /** 弹幕列表 */
@@ -17,11 +28,11 @@ export default class BulletScreen {
    * idle 闲置
    *  data 有值
    * running 上次添加弹幕状态 不可添加
-   * 轨道逻辑 如果是闲置状态，优先塞入闲置状态轨道，如果没有闲置状态的，在再塞入data状态的，并且给当前push的弹幕轨道增加running状态，直到渲染完成后，将状态改为data状态
+   * 轨道逻辑 如果是闲置状态，优先塞入闲置状态轨道，如果没有闲置状态的，在再塞入data状态的，并且给当前push的弹幕轨道增加running状态，直到下一次发送，将状态改为data状态
    */
   tracks: string[] = [];
   /** 暂停弹幕对列 */
-  queues: any[] = [];
+  queues: IQueues[] = [];
   /**
    *
    * @param ele 选择器字符串如 #id .class
@@ -116,7 +127,11 @@ export default class BulletScreen {
       } else {
         widthCount.forEach((item, index) => {
           // 向宽度最小的轨道(不是刚刚发过的轨道)中发送弹幕
-          if (smallCount.width >= item && this.tracks[index] !== 'running' && !readyIndex.length) {
+          if (
+            smallCount.width >= item &&
+            this.tracks[index] !== 'running' &&
+            !readyIndex.length
+          ) {
             // 如果不是最小值，重置
             if (smallCount.width > item) {
               smallCount.width = item;
@@ -130,7 +145,11 @@ export default class BulletScreen {
         // 从当前权重最低的轨道下标中，拿到再domChildren中最靠前的
         domChildren.forEach((dom) => {
           if (index > -1) return;
-          if (smallCount.index.includes(Number((dom as HTMLDivElement).dataset.track))) {
+          if (
+            smallCount.index.includes(
+              Number((dom as HTMLDivElement).dataset.track),
+            )
+          ) {
             index = Number((dom as HTMLDivElement).dataset.track);
             return;
           }
@@ -167,7 +186,7 @@ export default class BulletScreen {
     // 如果当前轨道下标是-1（没有轨道发送弹幕）或者是暂停状态
     if (curTrackIndex === -1 || this.allPaused) {
       // 考虑到全部暂停的情景
-      this.queues.push([item, bulletContainer, top]);
+      this.queues.push({ item, container: bulletContainer, customTop: top });
     } else {
       // 渲染
       this._render(item, bulletContainer, curTrackIndex, sendTimes!, top);
@@ -206,7 +225,13 @@ export default class BulletScreen {
    * @param sendTimes 弹幕发送频率
    * @param top 高度
    */
-  _render = (item: string | Element, container: HTMLDivElement, track: number, sendTimes: number, top?: number) => {
+  _render = (
+    item: any,
+    container: HTMLDivElement,
+    track: number,
+    sendTimes: number,
+    top?: number,
+  ) => {
     const { gap, trackHeight } = this.options;
 
     // 弹幕渲染进屏幕,如果是有效组件
@@ -231,8 +256,14 @@ export default class BulletScreen {
             if (intersectionRatio >= 1) {
               // 当前弹幕渲染后，判断是否有存积的弹幕，有则渲染
               if (this.queues.length) {
-                const [item, container, customTop] = this.queues.shift();
-                this._render(item, container, track, this.options.sendTimes!, customTop);
+                const { item, container, customTop } = this.queues.shift()!;
+                this._render(
+                  item,
+                  container,
+                  track,
+                  this.options.sendTimes!,
+                  customTop,
+                );
               }
             }
           });
@@ -306,7 +337,9 @@ export default class BulletScreen {
       item.remove();
     });
     const { height } = this.target!.getBoundingClientRect();
-    this.tracks = new Array(Math.floor(height / this.options.trackHeight)).fill('idle');
+    this.tracks = new Array(Math.floor(height / this.options.trackHeight)).fill(
+      'idle',
+    );
     this.queues = [];
     this.bullets = [];
   }
