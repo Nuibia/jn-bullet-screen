@@ -1,0 +1,51 @@
+.confessionWallContainer {
+    width:600px;
+    height:500px;
+    background-color: aqua;
+    .confessionWall {
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      .confessionWallContent {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        :global {
+          .confessionItem {
+            display: inline-flex;
+            align-items: center;
+            height: 24px;
+            border-radius: 12px;
+            padding-right: 10px;
+            margin-left: 12px;
+            &:first-child {
+              margin-left: 0;
+            }
+            background: linear-gradient(180deg, #ffeeee 0%, #f9fbfc 100%);
+            border: 0.5px solid #fb84a0;
+            .senderAvatar {
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              overflow: hidden;
+              border: 1px solid #fb84a0;
+              img {
+                width: 100%;
+                height: 100%;
+              }
+              margin-right: 8px;
+            }
+            .context {
+              font-family: PingFangSC-Regular;
+              font-size: 12px;
+              font-weight: normal;
+              line-height: 17px;
+              letter-spacing: 0px;
+              color: #e77989;
+            }
+          }
+        }
+      }
+    }
+  }
+  

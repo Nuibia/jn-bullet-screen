@@ -244,7 +244,7 @@ export default class BulletScreen {
       update();
       // TODO: 计算每一个弹幕的实际宽度
       //如果不写，苹果会有问题，苹果无法识别transform的-100%
-      container.style.width = '100%';
+      // container.style.width = '100%';
       // 将渲染出来的弹幕dom节点，添加到弹幕容器中
       this.target?.appendChild(container);
       // 不可连续发送两次弹幕在一条轨道,本次发送时，上次发送轨道为running状态

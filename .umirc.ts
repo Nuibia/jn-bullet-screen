@@ -1,4 +1,4 @@
-import routes from "./src/routes";
+import routes from "./config/routes";
 import { defineConfig } from "umi";
 
 export default defineConfig({
