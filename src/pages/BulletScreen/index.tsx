@@ -21,7 +21,7 @@ const ConfessionWall: FC = () => {
       bulletScreen!.push(
         <div className="confessionItem">
           <div className="senderAvatar">
-            <img src="" alt="头像" />
+            <img src={ require('@/assets/avatar.png')} alt="头像" />
           </div>
           <span className="context">弹幕内容</span>
         </div>,

@@ -45,9 +45,7 @@ const initBulletAnimate = (screen: HTMLElement | null) => {
   if (!screen) {
     return;
   }
-  const animateClass = 'BULLET_ANIMATE_CLASS';
   const style = document.createElement('style');
-  style.classList.add(animateClass);
   // 弹幕容器宽度
   // TODO:苹果手机无法识别100%，
   const width = screen.clientWidth;
@@ -71,9 +69,17 @@ interface IGetContainerProps extends IOptionsProps {
   currScreen: BulletScreen;
 }
 /** 获取弹幕容器 */
-const getContainer = (opts: IGetContainerProps) => {
-  const { currScreen, pauseOnHover, pauseOnClick, animate, loopCount, direction, delay, duration, animateTimeFun } = opts;
-
+const getContainer = ({
+  currScreen,
+  pauseOnHover,
+  pauseOnClick,
+  animate,
+  loopCount,
+  direction,
+  delay,
+  duration,
+  animateTimeFun,
+}: IGetContainerProps) => {
   // 创建单条弹幕的容器
   const bulletContainer = document.createElement('div');
   // 随机ID
@@ -88,11 +94,15 @@ const getContainer = (opts: IGetContainerProps) => {
   // 动画循环次数 infinite无限次 1 一次 string|number
   bulletContainer.style.animationIterationCount = loopCount as string;
   // 动画延迟开始
-  bulletContainer.style.animationDelay = (isNaN(delay as number) ? delay : `${delay}s`) as string;
+  bulletContainer.style.animationDelay = (
+    isNaN(delay as number) ? delay : `${delay}s`
+  ) as string;
   // 是否反向播放 可以通过此值，实现从左到右
   bulletContainer.style.animationDirection = direction;
   // 一个动画周期的时长
-  bulletContainer.style.animationDuration = (isNaN(duration as number) ? duration : `${duration}s`) as string;
+  bulletContainer.style.animationDuration = (
+    isNaN(duration as number) ? duration : `${duration}s`
+  ) as string;
   // 动画周期的节奏
   bulletContainer.style.animationTimingFunction = animateTimeFun;
   // 隐藏
@@ -106,7 +116,6 @@ const getContainer = (opts: IGetContainerProps) => {
     bulletContainer.addEventListener(
       'mouseenter',
       () => {
-        console.log('enter');
         bulletContainer.style.animationPlayState = 'paused';
       },
       false,
@@ -115,7 +124,6 @@ const getContainer = (opts: IGetContainerProps) => {
     bulletContainer.addEventListener(
       'mouseleave',
       () => {
-        console.log('leave');
         if (!currScreen.allPaused && !bulletContainer.dataset.clicked) {
           bulletContainer.style.animationPlayState = 'running';
         }
