@@ -5,14 +5,13 @@ import {
   getContainer,
   initBulletAnimate,
   IOptionsProps,
-} from './helper';
+} from './common';
 
 interface IQueues {
   item: any;
   container: HTMLDivElement;
   customTop: number | undefined;
 }
-
 export default class BulletScreen {
   /** 弹幕容器 */
   target: HTMLElement | null;
@@ -52,7 +51,7 @@ export default class BulletScreen {
         throw new Error('弹幕容器不存在');
       }
     } else {
-      throw new Error('The display target of the barrage must be set');
+      throw new Error('ele不能为空');
     }
 
     // 获取弹幕容器的高度
@@ -76,13 +75,15 @@ export default class BulletScreen {
    * 如果该弹道有弹幕，且不是刚刚发送弹幕，则该弹道为data状态
    */
   getTrackIndex(trackHeight: number) {
+    // console.log('this.tracks',this.tracks);
+
     // 空闲的轨道下标
     const readyIndex: number[] = [];
     let index = -1;
 
     // 优先取空闲状态的
-    this.tracks.forEach((st, index) => {
-      if (st === 'idle') {
+    this.tracks.forEach((status, index) => {
+      if (status === 'idle') {
         readyIndex.push(index);
       }
     });
@@ -160,6 +161,16 @@ export default class BulletScreen {
     if (index !== -1) {
       this.tracks[index] = 'running';
     }
+    // 获取当前弹幕轨道中为running但不是刚刚置为该状态的轨道，然后将其重置为data
+    const indices = this.tracks.reduce((acc, val, idx) => {
+      if (val === 'running') {
+        acc.push(idx);
+      }
+      return acc;
+    }, [] as number[]).filter(item => item !== index);
+    indices.forEach(index => {
+      this.tracks.splice(index,1,'data');
+    })    
     return index;
   }
 
@@ -171,7 +182,7 @@ export default class BulletScreen {
    */
   push(item: any, opts: Partial<IOptionsProps> = {}) {
     const options = Object.assign({}, this.options, opts);
-    const { onStart, onEnd, top, trackHeight, sendTimes } = options;
+    const { onStart, onEnd, top, trackHeight } = options;
 
     // 弹幕容器
     const bulletContainer = getContainer({
@@ -185,11 +196,11 @@ export default class BulletScreen {
     const curTrackIndex = this.getTrackIndex(trackHeight);
     // 如果当前轨道下标是-1（没有轨道发送弹幕）或者是暂停状态
     if (curTrackIndex === -1 || this.allPaused) {
-      // 考虑到全部暂停的情景
+      // 阻塞暂停对列
       this.queues.push({ item, container: bulletContainer, customTop: top });
     } else {
       // 渲染
-      this._render(item, bulletContainer, curTrackIndex, sendTimes!, top);
+      this.renderBullet(item, bulletContainer, curTrackIndex,  top);
     }
 
     if (onStart) {
@@ -222,14 +233,12 @@ export default class BulletScreen {
    * @param item 弹幕内容
    * @param container 承载弹幕的容器
    * @param track 弹幕轨道下标
-   * @param sendTimes 弹幕发送频率
    * @param top 高度
    */
-  _render = (
+  renderBullet = (
     item: any,
     container: HTMLDivElement,
     track: number,
-    sendTimes: number,
     top?: number,
   ) => {
     const { gap, trackHeight } = this.options;
@@ -257,11 +266,10 @@ export default class BulletScreen {
               // 当前弹幕渲染后，判断是否有存积的弹幕，有则渲染
               if (this.queues.length) {
                 const { item, container, customTop } = this.queues.shift()!;
-                this._render(
+                this.renderBullet(
                   item,
                   container,
                   track,
-                  this.options.sendTimes!,
                   customTop,
                 );
               }
@@ -272,17 +280,9 @@ export default class BulletScreen {
       };
       const root = createRoot(container);
       root.render(typeof item === 'string' ? <span>{item}</span> : item);
-      update();
-      // TODO: 计算每一个弹幕的实际宽度
-      //如果不写，苹果会有问题，苹果无法识别transform的-100%
-      // container.style.width = '100%';
+      update();      
       // 将渲染出来的弹幕dom节点，添加到弹幕容器中
-      this.target?.appendChild(container);
-      // 不可连续发送两次弹幕在一条轨道,本次发送时，上次发送轨道为running状态
-      let timer = setTimeout(() => {
-        this.tracks[track] = 'data';
-        clearTimeout(timer);
-      }, sendTimes * 3);
+      this.target?.appendChild(container);      
     }
   };
 

@@ -13,8 +13,6 @@ export interface IOptionsProps {
   direction: string;
   animateTimeFun: string;
   top?: number;
-  // 发送频率，毫秒,默认是0
-  sendTimes?: number;
 }
 /** 弹幕默认配置 */
 const defaultOptions: IOptionsProps = {
@@ -35,7 +33,6 @@ const defaultOptions: IOptionsProps = {
   direction: 'normal',
   animateTimeFun: 'linear',
   top: undefined,
-  sendTimes: 0,
 };
 /**
  * 给弹幕容器增加支持弹幕的样式
@@ -47,7 +44,6 @@ const initBulletAnimate = (screen: HTMLElement | null) => {
   }
   const style = document.createElement('style');
   // 弹幕容器宽度
-  // TODO:苹果手机无法识别100%，
   const width = screen.clientWidth;
   style.append(`@keyframes RightToLeft { 
     from {

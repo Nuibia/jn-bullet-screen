@@ -4,7 +4,6 @@ import styles from './index.less';
 
 let bulletScreen: BulletScreen | undefined = undefined;
 let timer: NodeJS.Timer | undefined = undefined;
-const sendTimes = 1200;
 
 const ConfessionWall: FC = () => {
   useEffect(() => {
@@ -12,7 +11,6 @@ const ConfessionWall: FC = () => {
       bulletScreen = new BulletScreen('#confessionWallId', {
         trackHeight: 30,
         duration: 10,
-        sendTimes,
         pauseOnClick: false,
       });
     }
@@ -27,7 +25,7 @@ const ConfessionWall: FC = () => {
         </div>,
       );
       index++;
-    }, sendTimes);
+    }, 2000);
     return () => {
       clearInterval(timer);
       bulletScreen = undefined;
